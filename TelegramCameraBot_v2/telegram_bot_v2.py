@@ -77,7 +77,6 @@ def run_bot():
 
 # --- 4. FLASK WEB SERVER ---
 HTML_TEMPLATE = """
-HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -183,7 +182,6 @@ HTML_TEMPLATE = """
     </script>
 </body>
 </html>
-"""
 """
 
 @app.route('/')
