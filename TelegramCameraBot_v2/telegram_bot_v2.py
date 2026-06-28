@@ -69,13 +69,17 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 def run_bot():
     bot_app = Application.builder().token(BOT_TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
+    
+    # YENİ SƏTİR: stats komandasını bura əlavə edirik
+    bot_app.add_handler(CommandHandler("stats", get_stats))
+    
     bot_app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     bot_app.run_polling()
+
 async def get_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     users = load_users()
-    total_users = len(users)  # Fayldakı açarların (istifadəçilərin) sayı
+    total_users = len(users)  # users.json faylının içindəki istifadəçi sayını tapır
     await update.message.reply_text(f"📊 **Ümumi istifadəçi sayı:** {total_users}")
-
 # Və bunu bot_app.add_handler-lərin arasına əlavə et:
 # bot_app.add_handler(CommandHandler("stats", get_stats))
 # --- 4. FLASK WEB SERVER ---
