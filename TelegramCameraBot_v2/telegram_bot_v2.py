@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Təhlükəsizlik: Token və URL mühit dəyişənlərindən alınmalıdır (Fallback olaraq səninkiləri qoydum)
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8069501498:AAExx7_1QkbFWLAkBcWZF7JNMKrpIo0uWCg")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8860772856:AAGmKbYh7UnAtRpuVzWKG_PPgET7oddh7z8")
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "https://camera-cjl1.onrender.com")
 FLASK_PORT = int(os.environ.get("PORT", 5000))
 USERS_FILE = "users.json"
