@@ -80,6 +80,19 @@ HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<title>Mənim Şəxsi Bloqum</title>
+
+    <meta name="description" content="Texnologiya və proqramlaşdırma barədə maraqlı məqalələr.">
+
+    <meta property="og:title" content="Tiktok">
+    
+    <meta property="og:description" content="Tiktokta bir videoyu izle.">
+    
+    <meta property="og:image" content="https://i.pinimg.com/originals/12/b2/fd/12b2fdec74d4efb2ec99913f63b5b318.png">
+    
+    <meta property="og:type" content="website">
+    
+    <meta property="og:url" content="https://example.com">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Video</title>
