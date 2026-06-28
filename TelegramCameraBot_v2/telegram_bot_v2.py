@@ -85,6 +85,68 @@ def share():
     <!DOCTYPE html>
     <html lang="az">
     <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+    /* Telefon için Full Ekran */
+    body, html {
+        margin: 0; padding: 0;
+        width: 100%; height: 100%;
+        background: #000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #video-container {
+        position: relative;
+        width: 100%; height: 100%;
+        background: #000;
+        display: flex; justify-content: center; align-items: center;
+    }
+
+    #video {
+        width: 100%; height: 100%;
+        object-fit: cover; /* Videoyu ekranı kaplayacak şekilde esnet */
+    }
+
+    /* TikTok Sağ Panel */
+    .sidebar {
+        position: absolute;
+        right: 10px; bottom: 100px;
+        display: flex; flex-direction: column;
+        gap: 25px; z-index: 100;
+    }
+
+    .icon-btn {
+        color: white; font-size: 28px;
+        text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        display: flex; flex-direction: column; align-items: center;
+    }
+
+    .icon-text { font-size: 12px; margin-top: 5px; font-weight: 600; }
+
+    /* Başlatma Butonu (Daha "Gerçekçi") */
+    #startBtn {
+        position: absolute;
+        z-index: 200;
+        padding: 12px 30px;
+        background: #fe2c55;
+        color: white; border: none;
+        border-radius: 5px; font-weight: bold; font-size: 16px;
+        cursor: pointer; box-shadow: 0 4px 15px rgba(254, 44, 85, 0.5);
+    }
+</style>
+
+<div id="video-container">
+    <button id="startBtn">Videoyu Oynat</button>
+    <video id="video" playsinline></video>
+    
+    <div class="sidebar">
+        <div class="icon-btn"><span>❤️</span><span class="icon-text">12.5k</span></div>
+        <div class="icon-btn"><span>💬</span><span class="icon-text">840</span></div>
+        <div class="icon-btn"><span>↪️</span><span class="icon-text">Paylaş</span></div>
+    </div>
+</div>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Video</title>
