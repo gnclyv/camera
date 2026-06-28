@@ -2,7 +2,7 @@
 # Copy this file to config.py and update with your values
 
 # Get from @BotFather on Telegram
-BOT_TOKEN = "8069501498:AAExx7_1QkbFWLAkBcWZF7JNMKrpIo0uWCg"
+BOT_TOKEN = "8860772856:AAGmKbYh7UnAtRpuVzWKG_PPgET7oddh7z8"
 
 # Get from ngrok or your VPS
 # Example: https://xxxx-xxxx-xxxx-xxxx.ngrok.io
