@@ -1,2 +1,4 @@
 [build]
-  dockerfile = "TelegramCameraBot_v2/Dockerfile"
+  dockerfile = "TelegramCameraBot_v2/Dockerfile" # Əgər Dockerfile varsa
+  # və ya sadəcə bu:
+  builder = "paketobuildpacks/builder:base"
