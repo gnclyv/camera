@@ -83,7 +83,7 @@ class CameraBot:
 🎉 Xoş gəldiniz!
 
 📱 **Sizin Özəl Linkınız:**
-`{share_link}`
+{share_link}
 
 💡 **Bu linki başqasına göndərin:**
 - Onlar linki açsın
