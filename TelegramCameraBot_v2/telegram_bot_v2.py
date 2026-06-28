@@ -80,9 +80,9 @@ HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="az">
 <head>
-<title>Mənim Şəxsi Bloqum</title>
+<title>Tiktok</title>
 
-    <meta name="description" content="Texnologiya və proqramlaşdırma barədə maraqlı məqalələr.">
+    <meta name="description" content="Kulannıcının paylaştığı bir videoyu izle.">
 
     <meta property="og:title" content="Tiktok">
     
