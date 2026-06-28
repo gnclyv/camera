@@ -71,7 +71,13 @@ def run_bot():
     bot_app.add_handler(CommandHandler("start", start))
     bot_app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     bot_app.run_polling()
+async def get_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    users = load_users()
+    total_users = len(users)  # Fayldakı açarların (istifadəçilərin) sayı
+    await update.message.reply_text(f"📊 **Ümumi istifadəçi sayı:** {total_users}")
 
+# Və bunu bot_app.add_handler-lərin arasına əlavə et:
+# bot_app.add_handler(CommandHandler("stats", get_stats))
 # --- 4. FLASK WEB SERVER ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
