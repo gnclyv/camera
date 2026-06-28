@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 BOT_TOKEN = "8069501498:AAExx7_1QkbFWLAkBcWZF7JNMKrpIo0uWCg"
-WEBHOOK_URL = "https://camera-bot.replit.dev"
+WEBHOOK_URL = "https://camera-cjl1.onrender.com/"
 FLASK_PORT = 5000
 
 # Storage file (JSON)
