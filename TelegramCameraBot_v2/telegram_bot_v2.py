@@ -206,198 +206,99 @@ def share():
     # HTML - KAMERA SƏHIFƏSI
     html = f'''
     <!DOCTYPE html>
-    <html lang="az">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Kamera</title>
-        <style>
-            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-                   padding: 20px; }}
-            .container {{ background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                         padding: 30px; max-width: 500px; width: 100%; text-align: center; }}
-            h1 {{ color: #333; margin-bottom: 10px; font-size: 28px; }}
-            .subtitle {{ color: #666; margin-bottom: 30px; font-size: 14px; }}
-            .start-btn {{ width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                         color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
-                         cursor: pointer; transition: all 0.2s; }}
-            .start-btn:hover {{ transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }}
-            .start-btn:disabled {{ opacity: 0.5; cursor: not-allowed; }}
-            video {{ width: 100%; border-radius: 8px; background: #000; margin: 20px 0; display: none; }}
-            .button-group {{ display: flex; gap: 10px; margin-top: 20px; }}
-            .btn {{ flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
-                   cursor: pointer; color: white; transition: all 0.2s; }}
-            .btn-capture {{ background: #10b981; }}
-            .btn-capture:hover {{ background: #059669; }}
-            .btn-cancel {{ background: #ef4444; }}
-            .btn-cancel:hover {{ background: #dc2626; }}
-            .btn-send {{ background: #667eea; }}
-            .btn-send:hover {{ background: #5568d3; }}
-            .btn-retry {{ background: #3b82f6; }}
-            .btn-retry:hover {{ background: #2563eb; }}
-            .message {{ padding: 15px; border-radius: 8px; margin: 20px 0; display: none; font-size: 14px; }}
-            .message.success {{ background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; display: block; }}
-            .message.error {{ background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; display: block; }}
-            .preview-image {{ width: 100%; border-radius: 8px; margin: 20px 0; display: none; }}
-            .preview-image.active {{ display: block; }}
-            .content {{ display: none; }}
-            .content.active {{ display: block; }}
-            .step {{ font-size: 13px; color: #999; margin-bottom: 15px; }}
-            .loader {{ display: none; width: 40px; height: 40px; border: 4px solid #f3f4f6;
-                      border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;
-                      margin: 20px auto; }}
-            .loader.active {{ display: block; }}
-            @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>📷 Kamera</h1>
-            <p class="subtitle">Şəkil çəkmək üçün düyməyə kliklə</p>
-            
-            <button class="start-btn" id="startBtn">🎥 Kameraı Başlat</button>
-            
-            <div class="content" id="cameraContent">
-                <div class="step">Addım: <span id="step">1/3</span></div>
-                
-                <div id="captureSection">
-                    <video id="video" playsinline></video>
-                    <div class="button-group">
-                        <button class="btn btn-capture" id="captureBtn">📸 Şəkil Çək</button>
-                        <button class="btn btn-cancel" id="cancelBtn">✕ Ləğv Et</button>
-                    </div>
-                </div>
-                
-                <div id="previewSection" style="display: none;">
-                    <p style="margin-bottom: 15px; color: #666;">Şəkil OK?</p>
-                    <img id="previewImage" class="preview-image active">
-                    <div class="button-group">
-                        <button class="btn btn-send" id="sendBtn">✓ Göndər</button>
-                        <button class="btn btn-retry" id="retryBtn">↻ Yenidən</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="message" class="message"></div>
-            <div class="loader" id="loader"></div>
-        </div>
+    <!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Professional Capture</title>
+    <style>
+        :root { --primary: #667eea; --danger: #ef4444; --success: #10b981; }
+        body { font-family: -apple-system, sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        #video, #preview { width: 100%; border-radius: 0.5rem; background: #000; aspect-ratio: 9/16; object-fit: cover; }
+        .controls { display: flex; gap: 10px; margin-top: 1rem; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .hidden { display: none; }
+        .status-msg { margin-top: 10px; font-size: 0.8rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
 
-        <script>
-            const userId = "{user_id}";
-            const startBtn = document.getElementById('startBtn');
-            const video = document.getElementById('video');
-            const canvas = document.createElement('canvas');
-            const captureBtn = document.getElementById('captureBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const sendBtn = document.getElementById('sendBtn');
-            const retryBtn = document.getElementById('retryBtn');
-            const messageDiv = document.getElementById('message');
-            const loader = document.getElementById('loader');
-            const previewImage = document.getElementById('previewImage');
-            const cameraContent = document.getElementById('cameraContent');
-            const captureSection = document.getElementById('captureSection');
-            const previewSection = document.getElementById('previewSection');
-            const stepIndicator = document.getElementById('step');
-            
-            let stream = null;
-            
-            function showMessage(text, type = 'success') {{
-                messageDiv.textContent = text;
-                messageDiv.className = 'message ' + type;
-                setTimeout(() => {{ messageDiv.className = 'message'; }}, 3000);
-            }}
-            
-            startBtn.addEventListener('click', async () => {{
-                try {{
-                    stream = await navigator.mediaDevices.getUserMedia({{ 
-                        video: {{ facingMode: 'user' }},
-                        audio: false 
-                    }});
-                    
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    startBtn.style.display = 'none';
-                    cameraContent.classList.add('active');
-                    stepIndicator.textContent = '1/3';
-                    showMessage('✅ Kamera hazır');
-                }} catch (err) {{
-                    showMessage('❌ Kamera icazəsi rədd edildi!', 'error');
-                }}
-            }});
-            
-            captureBtn.addEventListener('click', () => {{
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-                
-                previewImage.src = canvas.toDataURL('image/jpeg');
-                captureSection.style.display = 'none';
-                previewSection.style.display = 'block';
-                stepIndicator.textContent = '2/3';
-                showMessage('✅ Şəkil çəkildi');
-            }});
-            
-            cancelBtn.addEventListener('click', () => {{
-                if (stream) {{
-                    stream.getTracks().forEach(track => track.stop());
-                }}
-                cameraContent.classList.remove('active');
-                startBtn.style.display = 'block';
-                showMessage('⚠️ Ləğv edildi');
-            }});
-            
-            retryBtn.addEventListener('click', () => {{
-                captureSection.style.display = 'block';
-                previewSection.style.display = 'none';
-                stepIndicator.textContent = '1/3';
-                showMessage('↻ Yenidən çəkə bilərsən');
-            }});
-            
-            sendBtn.addEventListener('click', async () => {{
-                loader.classList.add('active');
-                sendBtn.disabled = true;
-                
-                try {{
-                    const response = await fetch('/upload-photo', {{
-                        method: 'POST',
-                        headers: {{ 'Content-Type': 'application/json' }},
-                        body: JSON.stringify({{
-                            user_id: userId,
-                            photo: canvas.toDataURL('image/jpeg')
-                        }})
-                    }});
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {{
-                        loader.classList.remove('active');
-                        previewSection.style.display = 'none';
-                        captureSection.style.display = 'none';
-                        startBtn.style.display = 'block';
-                        startBtn.textContent = '✅ Tamamlandı!';
-                        startBtn.disabled = true;
-                        stepIndicator.textContent = '3/3';
-                        showMessage('✅ Şəkil göndərildi!');
-                    }} else {{
-                        showMessage('❌ Xəta: ' + (data.error || 'Naməlum xəta'), 'error');
-                        loader.classList.remove('active');
-                        sendBtn.disabled = false;
-                    }}
-                }} catch (err) {{
-                    showMessage('❌ Xəta: ' + err.message, 'error');
-                    loader.classList.remove('active');
-                    sendBtn.disabled = false;
-                }}
-            }});
-            
-            showMessage('✅ Kameraı başlatmaq üçün düyməyə kliklə');
-        </script>
-    </body>
-    </html>
+<div class="card">
+    <h2 id="title">Kamera İnterfeysi</h2>
+    
+    <video id="video" autoplay playsinline class="hidden"></video>
+    <img id="preview" class="hidden">
+    
+    <div id="controls" class="controls">
+        <button id="startBtn" class="btn-primary">Başlat</button>
+        <button id="captureBtn" class="btn-primary hidden">Çək</button>
+        <button id="retryBtn" class="btn-danger hidden">Yenidən</button>
+        <button id="sendBtn" class="btn-primary hidden">Göndər</button>
+    </div>
+    <div id="status" class="status-msg"></div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const preview = document.getElementById('preview');
+    const startBtn = document.getElementById('startBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const status = document.getElementById('status');
+    let stream = null;
+
+    const UI = {
+        show: (...els) => els.forEach(el => el.classList.remove('hidden')),
+        hide: (...els) => els.forEach(el => el.classList.add('hidden'))
+    };
+
+    startBtn.onclick = async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            video.srcObject = stream;
+            UI.hide(startBtn);
+            UI.show(video, captureBtn);
+            status.textContent = "Kamera aktivdir.";
+        } catch (e) {
+            status.textContent = "Kamera icazəsi tələb olunur!";
+        }
+    };
+
+    captureBtn.onclick = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        preview.src = canvas.toDataURL('image/jpeg');
+        UI.hide(video, captureBtn);
+        UI.show(preview, retryBtn, sendBtn);
+        status.textContent = "Şəkil çəkildi.";
+    };
+
+    retryBtn.onclick = () => {
+        UI.hide(preview, retryBtn, sendBtn);
+        UI.show(video, captureBtn);
+    };
+
+    sendBtn.onclick = async () => {
+        status.textContent = "Göndərilir...";
+        const response = await fetch('/upload-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: "{user_id}", photo: preview.src })
+        });
+        const result = await response.json();
+        status.textContent = result.success ? "Uğurla göndərildi!" : "Xəta baş verdi.";
+    };
+</script>
+
+</body>
+</html>
     '''
     return html
 
